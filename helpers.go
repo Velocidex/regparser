@@ -326,6 +326,18 @@ func (self *CM_KEY_VALUE) TypeString() string {
 	return RegTypeToString(self.Type())
 }
 
+func (self *CM_KEY_VALUE) DataSize() int64 {
+	data_size := self.DataLength()
+	if data_size&0x80000000 > 0 {
+		// Data is so short it can be stored in the Data()
+		// field itself. In this case Data() is not a pointer
+		// but the actual data value.
+		data_size ^= 0x80000000
+	}
+
+	return int64(data_size)
+}
+
 // Parse out the data from the value into a Go ValueData type.
 func (self *CM_KEY_VALUE) ValueData() *ValueData {
 	result := &ValueData{Type: self.Type()}
