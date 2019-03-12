@@ -174,6 +174,7 @@ func (self *HCELL) KeyValue() *CM_KEY_VALUE {
 // indexes and just returns a list of subkeys regardless of the type
 // of indexes.
 func (self *CM_KEY_NODE) Subkeys() []*CM_KEY_NODE {
+	DebugPrint("_CM_KEY_NODE.Subkeys %x @ %x", self.Signature(), self.Offset)
 	child := self.Profile.HCELL(
 		self.Reader, 4096+int64(self.SubKeyLists()[0]))
 
@@ -190,7 +191,7 @@ func (self *CM_KEY_NODE) Subkeys() []*CM_KEY_NODE {
 		return fi.Subkeys()
 
 	} else {
-		fmt.Printf("Unknown KeyNode child %x @ %x\n",
+		DebugPrint("Unknown KeyNode child %x @ %x",
 			child.Signature(), child.Offset)
 	}
 
@@ -237,6 +238,7 @@ func (self *CM_KEY_NODE) Name() string {
 
 // Extract all subkeys stored in the fast index.
 func (self *CM_KEY_INDEX_FAST) Subkeys() []*CM_KEY_NODE {
+	DebugPrint("_CM_KEY_INDEX_FAST.Subkeys %x @ %x", self.Signature(), self.Offset)
 	result := []*CM_KEY_NODE{}
 
 	for _, element := range ParseArray_CM_KEY_INDEX_FAST_ELEMENT(
@@ -251,7 +253,7 @@ func (self *CM_KEY_INDEX_FAST) Subkeys() []*CM_KEY_NODE {
 			result = append(result, child_key)
 
 		} else {
-			fmt.Printf("%x: Unknown %x @ %x\n", self.Signature(),
+			DebugPrint("%x: Unknown %x @ %x", self.Signature(),
 				child.Signature(), child.Offset)
 		}
 	}
@@ -261,7 +263,7 @@ func (self *CM_KEY_INDEX_FAST) Subkeys() []*CM_KEY_NODE {
 
 // Extract subkeys from the index.
 func (self *CM_KEY_INDEX) Subkeys() []*CM_KEY_NODE {
-	fmt.Printf("_CM_KEY_INDEX %x @ %x\n", self.Signature(), self.Offset)
+	DebugPrint("_CM_KEY_INDEX.Subkeys %x @ %x", self.Signature(), self.Offset)
 
 	result := []*CM_KEY_NODE{}
 
@@ -277,8 +279,11 @@ func (self *CM_KEY_INDEX) Subkeys() []*CM_KEY_NODE {
 		} else if child_idx := child.KeyIndex(); child_idx != nil {
 			result = append(result, child_idx.Subkeys()...)
 
+		} else if child_idx := child.KeyIndexFast(); child_idx != nil {
+			result = append(result, child_idx.Subkeys()...)
+
 		} else {
-			fmt.Printf("%x: Unknown %x @ %x\n", self.Signature(),
+			DebugPrint("%x: Unknown %x @ %x", self.Signature(),
 				child.Signature(), child.Offset)
 		}
 	}
