@@ -30,6 +30,8 @@ func (self *Win10CreatorsEntry) LastMod(header *Win10CreatorsHeader) uint64 {
 
 	if self.Signature() == 0x73743030 {
 		offset += 10
+	} else if header.HeaderSize() == 0x80 {
+		offset += 10
 	}
 
 	return filetimeToUnixtime(ParseUint64(self.Reader, offset))

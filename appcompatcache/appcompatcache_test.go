@@ -13,9 +13,9 @@ import (
 
 var (
 	fixtures = []string{
-		//"Win10Creators.bin",
-		//		"Win10.bin",
-		//		"Win81.bin",
+		"Win10Creators.bin",
+		"Win10.bin",
+		"Win81.bin",
 		"Win80.bin",
 	}
 )
