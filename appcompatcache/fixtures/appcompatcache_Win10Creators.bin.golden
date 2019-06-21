@@ -1,0 +1,52 @@
+[
+  {
+   "name": "C:\\Program Files (x86)\\NVIDIA Corporation\\3D Vision\\nvstreg.exe",
+   "epoch": 1489704961,
+   "timestamp": "2017-03-17T08:56:01+10:00"
+  },
+  {
+   "name": "C:\\WINDOWS\\system32\\SystemSettingsAdminFlows.exe",
+   "epoch": 1489870703,
+   "timestamp": "2017-03-19T06:58:23+10:00"
+  },
+  {
+   "name": "C:\\Windows\\System32\\grpconv.exe",
+   "epoch": 1489870737,
+   "timestamp": "2017-03-19T06:58:57+10:00"
+  },
+  {
+   "name": "C:\\Windows\\SysWOW64\\grpconv.exe",
+   "epoch": 1489870737,
+   "timestamp": "2017-03-19T06:58:57+10:00"
+  },
+  {
+   "name": "C:\\WINDOWS\\system32\\runonce.exe",
+   "epoch": 1489870736,
+   "timestamp": "2017-03-19T06:58:56+10:00"
+  },
+  {
+   "name": "C:\\Windows\\SysWOW64\\rundll32.exe",
+   "epoch": 1489870736,
+   "timestamp": "2017-03-19T06:58:56+10:00"
+  },
+  {
+   "name": "C:\\Temp\\NVIDIA\\3DVision\\nvStInst.exe",
+   "epoch": 1489704960,
+   "timestamp": "2017-03-17T08:56:00+10:00"
+  },
+  {
+   "name": "C:\\Users\\eric\\AppData\\Local\\Temp\\{0E5D1094-B962-4212-AAE0-596961FC0007}\\ISBEW64.exe",
+   "epoch": 1177449752,
+   "timestamp": "2007-04-25T07:22:32+10:00"
+  },
+  {
+   "name": "C:\\Temp\\NVIDIA\\3DVision\\setup.exe",
+   "epoch": 1489704952,
+   "timestamp": "2017-03-17T08:55:52+10:00"
+  },
+  {
+   "name": "C:\\Program Files\\NVIDIA Corporation\\Installer2\\Display.3DVision.{DA27F5CA-7F04-4931-82CF-C499793E4712}\\3DVision.exe",
+   "epoch": 1489712466,
+   "timestamp": "2017-03-17T11:01:06+10:00"
+  }
+ ]

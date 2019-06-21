@@ -1,6 +1,7 @@
 Module: regparser
 Profile: RegistryProfile
 Filename: profile_vtypes.json
+GenerateDebugString: false
 Structs:
    - _HBASE_BLOCK
    - _GUID
