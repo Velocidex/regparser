@@ -27,6 +27,10 @@ func (self *FileTime) GoString() string {
 	return fmt.Sprintf("%v", self)
 }
 
+func (self *FileTime) DebugString() string {
+	return fmt.Sprintf("%v", self)
+}
+
 func (self *RegistryProfile) FileTime(reader io.ReaderAt, offset int64) *FileTime {
 	filetime := ParseUint64(reader, offset)
 	return &FileTime{time.Unix(int64(filetimeToUnixtime(filetime)), 0)}
@@ -35,6 +39,10 @@ func (self *RegistryProfile) FileTime(reader io.ReaderAt, offset int64) *FileTim
 // UTF16 null terminated string.
 type UnicodeString struct {
 	Value string
+}
+
+func (self *UnicodeString) DebugString() string {
+	return fmt.Sprintf("%v", self)
 }
 
 func (self *RegistryProfile) UnicodeString(reader io.ReaderAt, offset int64) *UnicodeString {
