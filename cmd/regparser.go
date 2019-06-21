@@ -45,7 +45,6 @@ func doLs() {
 	for _, value := range key.Values() {
 		fmt.Printf(" %s : %#v\n", value.ValueName(), value.ValueData())
 	}
-
 }
 
 func main() {
@@ -56,6 +55,9 @@ func main() {
 
 	case ls_command.FullCommand():
 		doLs()
+
+	case appcompatcache_command.FullCommand():
+		doAppCompatCache()
 
 	}
 }
