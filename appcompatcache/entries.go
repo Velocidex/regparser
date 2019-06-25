@@ -62,9 +62,9 @@ func ParseValueData(buffer []byte) []*CacheEntry {
 		}
 
 		result = append(result, &CacheEntry{
-			Name:      entry.Path(),
-			Epoch:     entry.LastMod(header),
-			Timestamp: time.Unix(ts, 0),
+			Name:  entry.Path(),
+			Epoch: entry.LastMod(header),
+			Time:  time.Unix(ts, 0),
 		})
 	}
 
