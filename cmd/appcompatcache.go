@@ -24,7 +24,7 @@ const (
 
 func parseAppCompatibilityCache(buffer []byte) {
 	for idx, entry := range appcompatcache.ParseValueData(buffer) {
-		fmt.Printf("%d: %v  %v\n", idx, entry.Timestamp, entry.Name)
+		fmt.Printf("%d: %v  %v\n", idx, entry.Time, entry.Name)
 	}
 }
 
