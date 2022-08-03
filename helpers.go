@@ -322,6 +322,9 @@ type ValueData struct {
 	// Filled in for REG_SZ etc.
 	String string
 
+	// Filled in for REG_MULTI_SZ
+	MultiSz []string
+
 	// Filled in for integer types
 	Uint64 uint64
 
@@ -432,6 +435,26 @@ func (self *CM_KEY_VALUE) ValueData() *ValueData {
 	case REG_SZ, REG_EXPAND_SZ:
 		result.String = UTF16BytesToUTF8(result.Data, binary.LittleEndian)
 
+	case REG_MULTI_SZ:
+		// Make sure the data is valid - len must be even.
+		if len(result.Data)%2 > 0 {
+			result.Data = append(result.Data, 0)
+		}
+		var tmp []byte
+		for i := 0; i < len(result.Data); i += 2 {
+			// NULL character represents the end of one string - flush
+			// it and reset for the next string.
+			if result.Data[i] == 0 && result.Data[i+1] == 0 {
+				if len(tmp) > 0 {
+					result.MultiSz = append(result.MultiSz,
+						UTF16BytesToUTF8(tmp, binary.LittleEndian))
+				}
+				tmp = nil
+			} else {
+				tmp = append(tmp, result.Data[i], result.Data[i+1])
+			}
+		}
+
 	case REG_BINARY:
 		// Leave the raw data as is in the ValueData struct.
 
@@ -469,8 +492,10 @@ func (self *ValueData) GoString() string {
 	switch self.Type {
 	case REG_SZ, REG_EXPAND_SZ:
 		return self.String
+
 	case REG_DWORD:
 		return fmt.Sprintf("%x", self.Uint64)
+
 	case REG_BINARY:
 		return spew.Sdump(self.Data[:10])
 	}
