@@ -216,8 +216,7 @@ func (self *CM_KEY_NODE) Values() []*CM_KEY_VALUE {
 		self.Reader,
 		4096+int64(self.ValueList().List()))
 
-	value_offsets := ParseArray_uint32(
-		self.Profile,
+	value_offsets := ParseSafeArray_uint32(
 		self.Reader,
 		value_list_cell.Payload(), int(count))
 
@@ -235,6 +234,8 @@ func (self *CM_KEY_NODE) Values() []*CM_KEY_VALUE {
 // The name of the a key. This does not include the full path through
 // its parents.
 func (self *CM_KEY_NODE) Name() string {
+	// NameLength is potentially corrupt, but since it is a uint16, this can
+	// at worst lead to a 64 KB allocation, which is acceptable.
 	buff := make([]byte, self.NameLength())
 	n, err := self.Reader.ReadAt(
 		buff, self.Profile.Off_CM_KEY_NODE__Name+self.Offset)
@@ -249,7 +250,7 @@ func (self *CM_KEY_INDEX_FAST) Subkeys() []*CM_KEY_NODE {
 	DebugPrint("_CM_KEY_INDEX_FAST.Subkeys %x @ %x", self.Signature(), self.Offset)
 	result := []*CM_KEY_NODE{}
 
-	for _, element := range ParseArray_CM_KEY_INDEX_FAST_ELEMENT(
+	for _, element := range ParseSafeArray_CM_KEY_INDEX_FAST_ELEMENT(
 		self.Profile,
 		self.Reader,
 		self.Offset+self.Profile.Off_CM_KEY_INDEX_FAST_List,
@@ -275,8 +276,7 @@ func (self *CM_KEY_INDEX) Subkeys() []*CM_KEY_NODE {
 
 	result := []*CM_KEY_NODE{}
 
-	for _, offset := range ParseArray_uint32(
-		self.Profile,
+	for _, offset := range ParseSafeArray_uint32(
 		self.Reader,
 		self.Offset+self.Profile.Off_CM_KEY_INDEX_List,
 		int(self.Count())) {
@@ -301,6 +301,8 @@ func (self *CM_KEY_INDEX) Subkeys() []*CM_KEY_NODE {
 
 // The name of this value (empty string means default value).
 func (self *CM_KEY_VALUE) ValueName() string {
+	// NameLength is potentially corrupt, but since it is a uint16, this can
+	// at worst lead to a 64 KB allocation, which is acceptable.
 	buff := make([]byte, self.NameLength())
 	n, err := self.Reader.ReadAt(
 		buff, self.Profile.Off_CM_KEY_VALUE_Name+self.Offset)
@@ -365,8 +367,7 @@ func (self *CM_KEY_VALUE) ValueData() *ValueData {
 		// field itself. In this case Data() is not a pointer
 		// but the actual data value.
 		data_size ^= 0x80000000
-		result.Data = ParseArray_byte(
-			self.Profile,
+		result.Data = ParseSafeArray_byte(
 			self.Reader,
 			self.Offset+self.Profile.Off_CM_KEY_VALUE_Data, 4)
 	} else {
@@ -385,8 +386,8 @@ func (self *CM_KEY_VALUE) ValueData() *ValueData {
 				self.Reader, 0x1000+int64(big_data.List()))
 
 			// Extract the segment offset list.
-			segment_list := ParseArray_uint32(
-				self.Profile, self.Reader,
+			segment_list := ParseSafeArray_uint32(
+				self.Reader,
 				list_cell.Payload(),
 				int(big_data.Count()))
 
@@ -412,8 +413,7 @@ func (self *CM_KEY_VALUE) ValueData() *ValueData {
 				}
 
 				result.Data = append(result.Data,
-					ParseArray_byte(
-						self.Profile,
+					ParseSafeArray_byte(
 						self.Reader,
 						segment_cell.Payload(),
 						int(segment_cell_size))...)
@@ -424,8 +424,7 @@ func (self *CM_KEY_VALUE) ValueData() *ValueData {
 			}
 		} else {
 			// Data is stored directly in a single cell.
-			result.Data = ParseArray_byte(
-				self.Profile,
+			result.Data = ParseSafeArray_byte(
 				self.Reader,
 				cell.Payload(), int(data_size))
 		}
@@ -501,4 +500,54 @@ func (self *ValueData) GoString() string {
 	}
 
 	return spew.Sdump(self)
+}
+
+func ParseSafeArray_uint32(reader io.ReaderAt, offset int64, count int) []uint32 {
+	result := []uint32{}
+	data := make([]byte, 4)
+	for i:=0; i<count; i++ {
+		_,  err := reader.ReadAt(data, offset)
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			continue
+		}
+		result = append(result, binary.LittleEndian.Uint32(data))
+		offset += 4
+	}
+	return result
+}
+
+func ParseSafeArray_byte(reader io.ReaderAt, offset int64, count int) []byte {
+	result := []byte{}
+	var data [1]byte
+	for i:=0; i<count; i++ {
+		_,  err := reader.ReadAt(data[:], offset)
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			continue
+		}
+		result = append(result, data[0])
+		offset += 1
+	}
+	return result
+}
+
+func ParseSafeArray_CM_KEY_INDEX_FAST_ELEMENT(profile *RegistryProfile, reader io.ReaderAt, offset int64, count int) []*CM_KEY_INDEX_FAST_ELEMENT {
+	result := []*CM_KEY_INDEX_FAST_ELEMENT{}
+	var probe [1]byte
+	for i:=0; i<count; i++ {
+		// Do a single byte read to probe whether we are still at a valid position
+		_,  err := reader.ReadAt(probe[:], offset)
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			continue
+		}
+		value := profile.CM_KEY_INDEX_FAST_ELEMENT(reader, offset)
+		result = append(result, value)
+		offset += int64(value.Size())
+	}
+	return result
 }
