@@ -6,11 +6,19 @@ import (
 	"strings"
 )
 
-func DebugPrint(fmt_str string, v ...interface{}) {
+var debugOutput bool
+
+func init() {
 	for _, x := range os.Environ() {
 		if strings.HasPrefix(x, "REGPARSER_DEBUG=") {
-			fmt.Printf(fmt_str, v...)
-			return
+			debugOutput = true
+			break
 		}
+	}
+}
+
+func DebugPrint(fmt_str string, v ...interface{}) {
+	if debugOutput {
+		fmt.Printf(fmt_str, v...)
 	}
 }
