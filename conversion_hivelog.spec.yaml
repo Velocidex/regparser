@@ -1,0 +1,9 @@
+Module: regparser
+Profile: HiveLogProfile
+Filename: hivelog_vtypes.json
+GenerateDebugString: false
+Structs:
+   - HIVE_LOG_ENTRY
+   - HIVE_DIRTY_PAGE_REF
+
+FieldBlackList:
