@@ -96,7 +96,8 @@ func RecoverHive(hive *os.File, logFiles ...*os.File) (*os.File, error) {
 
 	for _, l := range logFiles {
 		if s, err := l.Stat(); err != nil {
-			exitErr = fmt.Errorf("stat syscall on file %s failed (%v)", l.Name(), err)
+			exitErr = fmt.Errorf("stat syscall on file %s failed (%v)",
+				l.Name(), err)
 			goto fail
 		} else if s.Size() == 0 {
 			fmt.Printf("[info] Registry Hive %s empty: skipping\n", l.Name())
@@ -104,17 +105,21 @@ func RecoverHive(hive *os.File, logFiles ...*os.File) (*os.File, error) {
 		}
 		logReg, err := NewRegistry(l)
 		if err != nil {
-			exitErr = fmt.Errorf("invalid Registry Hive in log file %s (%v)", l.Name(), err)
+			exitErr = fmt.Errorf("invalid Registry Hive in log file %s (%v)",
+				l.Name(), err)
 			goto fail
 		}
 
 		if logReg.BaseBlock.Type() == 1 || logReg.BaseBlock.Type() == 2 {
-			fmt.Printf("[warn] version %d of log file '%s' not supported. skipping\n", logReg.BaseBlock.Type(), l.Name())
+			fmt.Printf("[warn] version %d of log file '%s' not supported. skipping\n",
+				logReg.BaseBlock.Type(), l.Name())
 			continue
 		}
 
 		if logReg.BaseBlock.Sequence1() < baseRegistry.BaseBlock.Sequence2() {
-			log.Printf("[info] skipping log file %s, sequence number mismatch (log starts at sequence number %d, base is already at %d)\n", l.Name(), logReg.BaseBlock.Sequence1(), baseRegistry.BaseBlock.Sequence2())
+			log.Printf("[info] skipping log file %s, sequence number mismatch (log starts at sequence number %d, base is already at %d)\n",
+				l.Name(), logReg.BaseBlock.Sequence1(),
+				baseRegistry.BaseBlock.Sequence2())
 			continue
 		}
 
@@ -141,7 +146,10 @@ func RecoverHive(hive *os.File, logFiles ...*os.File) (*os.File, error) {
 		var hbinsSize, sequenceNumber, hiveFlags uint32
 
 		for hasBytesLeft(logRegistry.Reader, logEntryOffset) {
-			logEntry := &HIVE_LOG_ENTRY{Reader: logRegistry.Reader, Offset: logEntryOffset, Profile: NewHiveLogProfile()}
+			logEntry := &HIVE_LOG_ENTRY{
+				Reader:  logRegistry.Reader,
+				Offset:  logEntryOffset,
+				Profile: NewRegistryProfile()}
 
 			if logEntry.Signature() != 0x454C7648 { // HvLE magic bytes
 				exitErr = fmt.Errorf("HvLE block at %#x has an invalid signature", logEntryOffset)
@@ -160,9 +168,11 @@ func RecoverHive(hive *os.File, logFiles ...*os.File) (*os.File, error) {
 					goto fail
 				}
 
-				n, err := newHiveFile.WriteAt(data, int64(page.PageOffset)+0x1000) // offset to first hbin is always 0x1000, page offset is relative to that
+				// offset to first hbin is always 0x1000, page offset is relative to that
+				n, err := newHiveFile.WriteAt(data, int64(page.PageOffset)+0x1000)
 				if n != int(page.PageSize) || err != nil {
-					exitErr = fmt.Errorf("cannot write page of size %#x at offset %#x (%v)", page.PageSize, page.PageOffset, err)
+					exitErr = fmt.Errorf("cannot write page of size %#x at offset %#x (%v)",
+						page.PageSize, page.PageOffset, err)
 					goto fail
 				}
 			}

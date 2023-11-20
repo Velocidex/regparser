@@ -36,6 +36,17 @@ func indent(text string) string {
 }
 
 type RegistryProfile struct {
+	Off_HIVE_DIRTY_PAGE_REF_PageOffset       int64
+	Off_HIVE_DIRTY_PAGE_REF_PageSize         int64
+	Off_HIVE_LOG_ENTRY_Signature             int64
+	Off_HIVE_LOG_ENTRY_LogEntrySize          int64
+	Off_HIVE_LOG_ENTRY_Flags                 int64
+	Off_HIVE_LOG_ENTRY_SequenceNumber        int64
+	Off_HIVE_LOG_ENTRY_HiveBinsDataSize      int64
+	Off_HIVE_LOG_ENTRY_DirtyPagesCount       int64
+	Off_HIVE_LOG_ENTRY_Hash1                 int64
+	Off_HIVE_LOG_ENTRY_Hash2                 int64
+	Off_HIVE_LOG_ENTRY_DirtyPageRefs         int64
 	Off_CHILD_LIST_Count                     int64
 	Off_CHILD_LIST_List                      int64
 	Off_CM_BIG_DATA_Count                    int64
@@ -124,8 +135,16 @@ type RegistryProfile struct {
 
 func NewRegistryProfile() *RegistryProfile {
 	// Specific offsets can be tweaked to cater for slight version mismatches.
-	self := &RegistryProfile{0, 4, 2, 4, 0, 2, 4, 0, 2, 4, 0, 0, 4, 28, 48, 74, 52, 2, 4, 56, 52, 64, 60, 76, 72, 16, 44, 0, 12, 20, 28, 52, 36, 52, 68, 8, 4, 16, 20, 2, 0, 18, 12, 0, 4, 6, 8, 4092, 4088, 508, 44, 48, 144, 32, 164, 40, 128, 20, 24, 168, 512, 112, 36, 4, 8, 0, 4072, 4056, 4040, 12, 148, 28, 4, 12, 0, 8, 28, 20, 0, 4, 4, 4, 0, 0}
+	self := &RegistryProfile{0, 4, 0, 4, 8, 12, 16, 20, 24, 32, 40, 0, 4, 2, 4, 0, 2, 4, 0, 2, 4, 0, 0, 4, 28, 48, 74, 52, 2, 4, 56, 52, 64, 60, 76, 72, 16, 44, 0, 12, 20, 28, 52, 36, 52, 68, 8, 4, 16, 20, 2, 0, 18, 12, 0, 4, 6, 8, 4092, 4088, 508, 44, 48, 144, 32, 164, 40, 128, 20, 24, 168, 512, 112, 36, 4, 8, 0, 4072, 4056, 4040, 12, 148, 28, 4, 12, 0, 8, 28, 20, 0, 4, 4, 4, 0, 0}
 	return self
+}
+
+func (self *RegistryProfile) HIVE_DIRTY_PAGE_REF(reader io.ReaderAt, offset int64) *HIVE_DIRTY_PAGE_REF {
+	return &HIVE_DIRTY_PAGE_REF{Reader: reader, Offset: offset, Profile: self}
+}
+
+func (self *RegistryProfile) HIVE_LOG_ENTRY(reader io.ReaderAt, offset int64) *HIVE_LOG_ENTRY {
+	return &HIVE_LOG_ENTRY{Reader: reader, Offset: offset, Profile: self}
 }
 
 func (self *RegistryProfile) CHILD_LIST(reader io.ReaderAt, offset int64) *CHILD_LIST {
@@ -174,6 +193,70 @@ func (self *RegistryProfile) HCELL(reader io.ReaderAt, offset int64) *HCELL {
 
 func (self *RegistryProfile) LARGE_INTEGER(reader io.ReaderAt, offset int64) *LARGE_INTEGER {
 	return &LARGE_INTEGER{Reader: reader, Offset: offset, Profile: self}
+}
+
+type HIVE_DIRTY_PAGE_REF struct {
+	Reader  io.ReaderAt
+	Offset  int64
+	Profile *RegistryProfile
+}
+
+func (self *HIVE_DIRTY_PAGE_REF) Size() int {
+	return 8
+}
+
+func (self *HIVE_DIRTY_PAGE_REF) PageOffset() uint32 {
+	return ParseUint32(self.Reader, self.Profile.Off_HIVE_DIRTY_PAGE_REF_PageOffset+self.Offset)
+}
+
+func (self *HIVE_DIRTY_PAGE_REF) PageSize() uint32 {
+	return ParseUint32(self.Reader, self.Profile.Off_HIVE_DIRTY_PAGE_REF_PageSize+self.Offset)
+}
+
+type HIVE_LOG_ENTRY struct {
+	Reader  io.ReaderAt
+	Offset  int64
+	Profile *RegistryProfile
+}
+
+func (self *HIVE_LOG_ENTRY) Size() int {
+	return 40
+}
+
+func (self *HIVE_LOG_ENTRY) Signature() uint32 {
+	return ParseUint32(self.Reader, self.Profile.Off_HIVE_LOG_ENTRY_Signature+self.Offset)
+}
+
+func (self *HIVE_LOG_ENTRY) LogEntrySize() uint32 {
+	return ParseUint32(self.Reader, self.Profile.Off_HIVE_LOG_ENTRY_LogEntrySize+self.Offset)
+}
+
+func (self *HIVE_LOG_ENTRY) Flags() uint32 {
+	return ParseUint32(self.Reader, self.Profile.Off_HIVE_LOG_ENTRY_Flags+self.Offset)
+}
+
+func (self *HIVE_LOG_ENTRY) SequenceNumber() uint32 {
+	return ParseUint32(self.Reader, self.Profile.Off_HIVE_LOG_ENTRY_SequenceNumber+self.Offset)
+}
+
+func (self *HIVE_LOG_ENTRY) HiveBinsDataSize() uint32 {
+	return ParseUint32(self.Reader, self.Profile.Off_HIVE_LOG_ENTRY_HiveBinsDataSize+self.Offset)
+}
+
+func (self *HIVE_LOG_ENTRY) DirtyPagesCount() uint32 {
+	return ParseUint32(self.Reader, self.Profile.Off_HIVE_LOG_ENTRY_DirtyPagesCount+self.Offset)
+}
+
+func (self *HIVE_LOG_ENTRY) Hash1() uint64 {
+	return ParseUint64(self.Reader, self.Profile.Off_HIVE_LOG_ENTRY_Hash1+self.Offset)
+}
+
+func (self *HIVE_LOG_ENTRY) Hash2() uint64 {
+	return ParseUint64(self.Reader, self.Profile.Off_HIVE_LOG_ENTRY_Hash2+self.Offset)
+}
+
+func (self *HIVE_LOG_ENTRY) DirtyPageRefs() []*HIVE_DIRTY_PAGE_REF {
+	return ParseArray_HIVE_DIRTY_PAGE_REF(self.Profile, self.Reader, self.Profile.Off_HIVE_LOG_ENTRY_DirtyPageRefs+self.Offset, int(self.DirtyPagesCount()))
 }
 
 type CHILD_LIST struct {
@@ -641,6 +724,16 @@ func ParseArray_CM_KEY_INDEX_FAST_ELEMENT(profile *RegistryProfile, reader io.Re
 	result := make([]*CM_KEY_INDEX_FAST_ELEMENT, 0, count)
 	for i := 0; i < count; i++ {
 		value := profile.CM_KEY_INDEX_FAST_ELEMENT(reader, offset)
+		result = append(result, value)
+		offset += int64(value.Size())
+	}
+	return result
+}
+
+func ParseArray_HIVE_DIRTY_PAGE_REF(profile *RegistryProfile, reader io.ReaderAt, offset int64, count int) []*HIVE_DIRTY_PAGE_REF {
+	result := make([]*HIVE_DIRTY_PAGE_REF, 0, count)
+	for i := 0; i < count; i++ {
+		value := profile.HIVE_DIRTY_PAGE_REF(reader, offset)
 		result = append(result, value)
 		offset += int64(value.Size())
 	}
