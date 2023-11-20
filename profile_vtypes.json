@@ -181,5 +181,23 @@
         "Signature": [0, ["unsigned short", {}]],
         "Spare": [18, ["unsigned short", {}]],
         "Type": [12, ["unsigned long", {}]]
+    }],
+    "HIVE_LOG_ENTRY": [40, {
+        "Signature": [0, ["unsigned long", {}]],
+        "LogEntrySize": [4, ["unsigned long", {}]],
+        "Flags": [8, ["unsigned long", {}]],
+        "SequenceNumber": [12, ["unsigned long", {}]],
+        "HiveBinsDataSize": [16, ["unsigned long", {}]],
+        "DirtyPagesCount": [20, ["unsigned long", {}]],
+        "Hash1": [24, ["unsigned long long", {}]],
+        "Hash2": [32, ["unsigned long long", {}]],
+        "DirtyPageRefs": [40, ["Array", {
+            "target": "HIVE_DIRTY_PAGE_REF",
+            "dynamic_count": "DirtyPagesCount"
+        }]]
+    }],
+    "HIVE_DIRTY_PAGE_REF": [8, {
+        "PageOffset": [0, ["unsigned long", {}]],
+        "PageSize": [4, ["unsigned long", {}]]
     }]
 }
