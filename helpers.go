@@ -469,7 +469,11 @@ func (self *ValueData) GoString() string {
 		return fmt.Sprintf("%x", self.Uint64)
 
 	case REG_BINARY:
-		return spew.Sdump(self.Data[:10])
+		data := self.Data
+		if len(data) > 1024 {
+			data = data[:1024]
+		}
+		return spew.Sdump(data)
 	}
 
 	return spew.Sdump(self)

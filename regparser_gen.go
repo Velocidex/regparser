@@ -761,7 +761,8 @@ func ParseArray_uint32(profile *RegistryProfile, reader io.ReaderAt, offset int6
 }
 
 func ParseInt32(reader io.ReaderAt, offset int64) int32 {
-	data := make([]byte, 4)
+	var buf [4]byte
+	data := buf[:]
 	_, err := reader.ReadAt(data, offset)
 	if err != nil {
 		return 0
@@ -770,7 +771,8 @@ func ParseInt32(reader io.ReaderAt, offset int64) int32 {
 }
 
 func ParseInt64(reader io.ReaderAt, offset int64) int64 {
-	data := make([]byte, 8)
+	var buf [8]byte
+	data := buf[:]
 	_, err := reader.ReadAt(data, offset)
 	if err != nil {
 		return 0
@@ -779,7 +781,8 @@ func ParseInt64(reader io.ReaderAt, offset int64) int64 {
 }
 
 func ParseUint16(reader io.ReaderAt, offset int64) uint16 {
-	data := make([]byte, 2)
+	var buf [2]byte
+	data := buf[:]
 	_, err := reader.ReadAt(data, offset)
 	if err != nil {
 		return 0
@@ -788,7 +791,8 @@ func ParseUint16(reader io.ReaderAt, offset int64) uint16 {
 }
 
 func ParseUint32(reader io.ReaderAt, offset int64) uint32 {
-	data := make([]byte, 4)
+	var buf [4]byte
+	data := buf[:]
 	_, err := reader.ReadAt(data, offset)
 	if err != nil {
 		return 0
@@ -797,7 +801,8 @@ func ParseUint32(reader io.ReaderAt, offset int64) uint32 {
 }
 
 func ParseUint64(reader io.ReaderAt, offset int64) uint64 {
-	data := make([]byte, 8)
+	var buf [8]byte
+	data := buf[:]
 	_, err := reader.ReadAt(data, offset)
 	if err != nil {
 		return 0
@@ -806,16 +811,18 @@ func ParseUint64(reader io.ReaderAt, offset int64) uint64 {
 }
 
 func ParseUint8(reader io.ReaderAt, offset int64) byte {
-	result := make([]byte, 1)
-	_, err := reader.ReadAt(result, offset)
+	var buf [1]byte
+	data := buf[:]
+	_, err := reader.ReadAt(data, offset)
 	if err != nil {
 		return 0
 	}
-	return result[0]
+	return data[0]
 }
 
 func ParseTerminatedUTF16String(reader io.ReaderAt, offset int64) string {
-	data := make([]byte, 1024)
+	var buf [1024]byte
+	data := buf[:]
 	n, err := reader.ReadAt(data, offset)
 	if err != nil && err != io.EOF {
 		return ""
