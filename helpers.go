@@ -8,8 +8,6 @@ import (
 	"fmt"
 	"io"
 	"time"
-	"unicode/utf16"
-	"unicode/utf8"
 
 	"github.com/davecgh/go-spew/spew"
 )
@@ -68,31 +66,6 @@ func (self *RegistryProfile) UnicodeString(reader io.ReaderAt, offset int64) *Un
 
 func (self *UnicodeString) GoString() string {
 	return self.Value
-}
-
-func UTF16BytesToUTF8(b []byte, o binary.ByteOrder) string {
-	if len(b) < 2 {
-		return ""
-	}
-
-	if b[0] == 0xff && b[1] == 0xfe {
-		o = binary.BigEndian
-		b = b[2:]
-	} else if b[0] == 0xfe && b[1] == 0xff {
-		o = binary.LittleEndian
-		b = b[2:]
-	}
-
-	utf := make([]uint16, (len(b)+(2-1))/2)
-
-	for i := 0; i+(2-1) < len(b); i += 2 {
-		utf[i/2] = o.Uint16(b[i:])
-	}
-	if len(b)/2 < len(utf) {
-		utf[len(utf)-1] = utf8.RuneError
-	}
-
-	return string(utf16.Decode(utf))
 }
 
 // HBASE_BLOCK is the file header block at the start of the registry file.
@@ -496,7 +469,11 @@ func (self *ValueData) GoString() string {
 		return fmt.Sprintf("%x", self.Uint64)
 
 	case REG_BINARY:
-		return spew.Sdump(self.Data[:10])
+		data := self.Data
+		if len(data) > 1024 {
+			data = data[:1024]
+		}
+		return spew.Sdump(data)
 	}
 
 	return spew.Sdump(self)
@@ -505,8 +482,8 @@ func (self *ValueData) GoString() string {
 func ParseSafeArray_uint32(reader io.ReaderAt, offset int64, count int) []uint32 {
 	result := []uint32{}
 	data := make([]byte, 4)
-	for i:=0; i<count; i++ {
-		_,  err := reader.ReadAt(data, offset)
+	for i := 0; i < count; i++ {
+		_, err := reader.ReadAt(data, offset)
 		if err == io.EOF {
 			break
 		} else if err != nil {
@@ -521,8 +498,8 @@ func ParseSafeArray_uint32(reader io.ReaderAt, offset int64, count int) []uint32
 func ParseSafeArray_byte(reader io.ReaderAt, offset int64, count int) []byte {
 	result := []byte{}
 	var data [1]byte
-	for i:=0; i<count; i++ {
-		_,  err := reader.ReadAt(data[:], offset)
+	for i := 0; i < count; i++ {
+		_, err := reader.ReadAt(data[:], offset)
 		if err == io.EOF {
 			break
 		} else if err != nil {
@@ -537,9 +514,9 @@ func ParseSafeArray_byte(reader io.ReaderAt, offset int64, count int) []byte {
 func ParseSafeArray_CM_KEY_INDEX_FAST_ELEMENT(profile *RegistryProfile, reader io.ReaderAt, offset int64, count int) []*CM_KEY_INDEX_FAST_ELEMENT {
 	result := []*CM_KEY_INDEX_FAST_ELEMENT{}
 	var probe [1]byte
-	for i:=0; i<count; i++ {
+	for i := 0; i < count; i++ {
 		// Do a single byte read to probe whether we are still at a valid position
-		_,  err := reader.ReadAt(probe[:], offset)
+		_, err := reader.ReadAt(probe[:], offset)
 		if err == io.EOF {
 			break
 		} else if err != nil {
