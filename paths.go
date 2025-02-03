@@ -18,7 +18,7 @@ func SplitComponents(path string) []string {
 		match := component_quoted_regex.FindStringSubmatch(path)
 		if len(match) > 0 {
 			if len(match[1]) > 0 {
-				components = append(components, strings.ToLower(match[1]))
+				components = append(components, match[1])
 			}
 			path = path[len(match[0]):]
 			continue
@@ -26,14 +26,14 @@ func SplitComponents(path string) []string {
 		match = component_unquoted_regex.FindStringSubmatch(path)
 		if len(match) > 0 {
 			if len(match[1]) > 0 {
-				components = append(components, strings.ToLower(match[1]))
+				components = append(components, match[1])
 			}
 			path = path[len(match[0]):]
 			continue
 		}
 
 		// This should never happen!
-		return strings.Split(strings.ToLower(path), "\\")
+		return strings.Split(path, "\\")
 	}
 	return components
 }

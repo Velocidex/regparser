@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"path"
 
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 	"www.velocidex.com/golang/regparser"
@@ -33,7 +32,7 @@ func doLs() {
 		kingpin.Fatalf("Key path not found %v", *ls_command_path)
 	}
 
-	fmt.Printf("Listing key %s (%v)\n\n", path.Join(*ls_command_path, key.Name()),
+	fmt.Printf("Listing key %s (%v)\n\n", *ls_command_path,
 		key.LastWriteTime())
 
 	fmt.Printf("Subkeys:\n")
