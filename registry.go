@@ -47,7 +47,7 @@ subkey_match:
 		}
 
 		for _, subkey := range nk.Subkeys() {
-			if subkey.Name() == component {
+			if strings.ToLower(subkey.Name()) == component {
 				nk = subkey
 				continue subkey_match
 			}
