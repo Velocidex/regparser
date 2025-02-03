@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 )
 
 // Model a registry hive with this object.
@@ -46,8 +47,10 @@ subkey_match:
 			continue
 		}
 
+		component = strings.ToLower(component)
+
 		for _, subkey := range nk.Subkeys() {
-			if subkey.Name() == component {
+			if strings.ToLower(subkey.Name()) == component {
 				nk = subkey
 				continue subkey_match
 			}
